@@ -1,7 +1,13 @@
 import React from 'react'
 
-export default function Statistics({calculateStatistics, good, neutral, bad}) {
-  const { total, average, positive } = calculateStatistics
+export default function Statistics({good, neutral, bad}) {
+  const getStatistics = () => {
+      const total = good + neutral + bad
+      const average = (good - bad) / total || 0
+      const positive = (good / total) * 100 || 0
+      return { total, average, positive }
+    }
+  const { total, average, positive } = getStatistics()
   return (
     <div>
       <p>good {good}</p>
