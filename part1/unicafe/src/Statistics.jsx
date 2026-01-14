@@ -8,8 +8,14 @@ export default function Statistics({good, neutral, bad}) {
       return { total, average, positive }
     }
   const { total, average, positive } = getStatistics()
-  return (
-    <div>
+  if (total === 0) {
+    return (
+      <p>No feedback given</p>
+    )
+  } else {
+
+    return (
+      <div>
       <p>good {good}</p>
       <p>neutral {neutral}</p>
       <p>bad {bad}</p>
@@ -18,4 +24,5 @@ export default function Statistics({good, neutral, bad}) {
       <p>positive {positive} %</p>
     </div>
   )
+}
 }
