@@ -1,12 +1,14 @@
-import React from 'react'
 import Part from './Part'
 
 export default function Content(props) {
+    const parts = props.course['parts']
   return (
     <div>
-        <Part part={props.parts[0]} exercises={props.exercises[0]} />
-        <Part part={props.parts[1]} exercises={props.exercises[1]} />
-        <Part part={props.parts[2]} exercises={props.exercises[2]} />
+        {
+            parts.map(part => 
+                <Part key={part.name} parts={part} />
+            )
+        }
     </div>
   )
 }
