@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
 import AddNew from './AddNew'
 import Filter from './Filter'
-import Numbers from './Numbers'   
+import Numbers from './Numbers'
+import Notification from './Notification'
 import { addPerson, updatePerson, getPersons } from './services/api'
+import '../index.css'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
   const filteredPersons = persons.filter((person) => person.name.toLowerCase().includes(filter.toLowerCase()))
 
   useEffect(() => {
@@ -33,9 +36,10 @@ const App = () => {
             setPersons(persons.map((person) => (person.id === existing.id ? response.data : person)))
             setNewName('')
             setNewNumber('')
+            setNotification({ type: 'success', message: `Updated ${newName}'s number` })
           })
           .catch((error) => {
-            console.error('Error:', error)
+            setNotification({ type: 'error', message: error.response.data.error })
           })
       }
       return
@@ -46,18 +50,20 @@ const App = () => {
         setPersons(persons.concat(response.data))
         setNewName('')
         setNewNumber('')
+        setNotification({ type: 'success', message: `Added ${newName} to the phonebook` })
       })
       .catch((error) => {
-        console.error('Error:', error)
+        setNotification({ type: 'error', message: error.response.data.error })
       })
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notification={notification} />
       <Filter filter={filter} setFilter={setFilter} />
       <AddNew handleAddPerson={handleAddPerson} newName={newName} setNewName={setNewName} newNumber={newNumber} setNewNumber={setNewNumber} />
-      <Numbers filteredPersons={filteredPersons} setPersons={setPersons} />
+      <Numbers filteredPersons={filteredPersons} setPersons={setPersons} setNotification={setNotification} />
     </div>
   )
 }
