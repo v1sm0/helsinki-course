@@ -1,41 +1,63 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AddNew from './AddNew'
 import Filter from './Filter'
-import Numbers from './Numbers'
+import Numbers from './Numbers'   
+import { addPerson, updatePerson, getPersons } from './services/api'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   const filteredPersons = persons.filter((person) => person.name.toLowerCase().includes(filter.toLowerCase()))
 
-  const addPerson = (event) => {
+  useEffect(() => {
+    getPersons().then(response => {
+      setPersons(response.data)
+    })
+  }, [])
+
+  const handleAddPerson = (event) => {
     event.preventDefault()
-    if (persons.some((person) => person.name === newName)) {
-      alert(`${newName} is already in the phonebook`)
+    if (newName === '' || newNumber === '') {
+      alert('Name and number are required')
       return
     }
-    if (persons.some((person) => person.number === newNumber)) {
-      alert(`${newNumber} is already in the phonebook`)
+
+    const existing = persons.find((person) => person.name === newName)
+
+    if (existing) {
+      if (window.confirm(`${newName} is already in the phonebook, replace the old number with a new one?`)) {
+        updatePerson(existing.id, { name: newName, number: newNumber })
+          .then((response) => {
+            setPersons(persons.map((person) => (person.id === existing.id ? response.data : person)))
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch((error) => {
+            console.error('Error:', error)
+          })
+      }
       return
     }
-    setPersons([...persons, { name: newName, number: newNumber }])
-    setNewName('')
-    setNewNumber('')
+
+    addPerson({ name: newName, number: newNumber })
+      .then((response) => {
+        setPersons(persons.concat(response.data))
+        setNewName('')
+        setNewNumber('')
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
       <Filter filter={filter} setFilter={setFilter} />
-      <AddNew addPerson={addPerson} />
-      <Numbers filteredPersons={filteredPersons} />
+      <AddNew handleAddPerson={handleAddPerson} newName={newName} setNewName={setNewName} newNumber={newNumber} setNewNumber={setNewNumber} />
+      <Numbers filteredPersons={filteredPersons} setPersons={setPersons} />
     </div>
   )
 }
